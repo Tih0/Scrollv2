@@ -1,0 +1,2340 @@
+[
+  {
+    "type": "constructor",
+    "stateMutability": "nonpayable",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "_minGasToTransfer",
+        "internalType": "uint256"
+      },
+      {
+        "type": "address",
+        "name": "_lzEndpoint",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "_startMintId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "_endMintId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "_mintFee",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "_bridgeFee",
+        "internalType": "uint256"
+      },
+      {
+        "type": "address",
+        "name": "_feeCollector",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "_referralEarningBips",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ZeriusONFT721_CoreError",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "errorCode",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "event",
+    "name": "Approval",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "approved",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ApprovalForAll",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "operator",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "bool",
+        "name": "approved",
+        "internalType": "bool",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "BridgeFeeChanged",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "oldBridgeFee",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "newBridgeFee",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "BridgeFeeEarned",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint16",
+        "name": "dstChainId",
+        "internalType": "uint16",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "amount",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CreditCleared",
+    "inputs": [
+      {
+        "type": "bytes32",
+        "name": "_hashedPayload",
+        "internalType": "bytes32",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "CreditStored",
+    "inputs": [
+      {
+        "type": "bytes32",
+        "name": "_hashedPayload",
+        "internalType": "bytes32",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_payload",
+        "internalType": "bytes",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EarningBipsForReferrerChanged",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "referrer",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "newEraningBips",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "EarningBipsForReferrersChanged",
+    "inputs": [
+      {
+        "type": "address[]",
+        "name": "referrers",
+        "internalType": "address[]",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "newEraningBips",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FeeCollectorChanged",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "oldFeeCollector",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "newFeeCollector",
+        "internalType": "address",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FeeEarningsClaimed",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "collector",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "claimedAmount",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MessageFailed",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes",
+        "indexed": false
+      },
+      {
+        "type": "uint64",
+        "name": "_nonce",
+        "internalType": "uint64",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_payload",
+        "internalType": "bytes",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_reason",
+        "internalType": "bytes",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MintFeeChanged",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "oldMintFee",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "newMintFee",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ONFTMinted",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "minter",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "itemId",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "feeEarnings",
+        "internalType": "uint256",
+        "indexed": false
+      },
+      {
+        "type": "address",
+        "name": "referrer",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "referrerEarnings",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "previousOwner",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "newOwner",
+        "internalType": "address",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ReceiveFromChain",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16",
+        "indexed": true
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "_toAddress",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256[]",
+        "name": "_tokenIds",
+        "internalType": "uint256[]",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ReferralEarningBipsChanged",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "oldReferralEarningBips",
+        "internalType": "uint256",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "newReferralEarningBips",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ReferrerEarningsClaimed",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "referrer",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "claimedAmount",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RetryMessageSuccess",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes",
+        "indexed": false
+      },
+      {
+        "type": "uint64",
+        "name": "_nonce",
+        "internalType": "uint64",
+        "indexed": false
+      },
+      {
+        "type": "bytes32",
+        "name": "_payloadHash",
+        "internalType": "bytes32",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SendToChain",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "_from",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "bytes",
+        "name": "_toAddress",
+        "internalType": "bytes",
+        "indexed": true
+      },
+      {
+        "type": "uint256[]",
+        "name": "_tokenIds",
+        "internalType": "uint256[]",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetDstChainIdToBatchLimit",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "_dstChainIdToBatchLimit",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetDstChainIdToTransferGas",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "_dstChainIdToTransferGas",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetMinDstGas",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "uint16",
+        "name": "_type",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "uint256",
+        "name": "_minDstGas",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetMinGasToTransferAndStore",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "_minGasToTransferAndStore",
+        "internalType": "uint256",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetPrecrime",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "precrime",
+        "internalType": "address",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetTrustedRemote",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_remoteChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_path",
+        "internalType": "bytes",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SetTrustedRemoteAddress",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_remoteChainId",
+        "internalType": "uint16",
+        "indexed": false
+      },
+      {
+        "type": "bytes",
+        "name": "_remoteAddress",
+        "internalType": "bytes",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenURIChanged",
+    "inputs": [
+      {
+        "type": "string",
+        "name": "oldTokenURI",
+        "internalType": "string",
+        "indexed": true
+      },
+      {
+        "type": "string",
+        "name": "newTokenURI",
+        "internalType": "string",
+        "indexed": true
+      },
+      {
+        "type": "string",
+        "name": "fileExtension",
+        "internalType": "string",
+        "indexed": false
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenURILocked",
+    "inputs": [
+      {
+        "type": "bool",
+        "name": "newState",
+        "internalType": "bool",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Transfer",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address",
+        "indexed": true
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256",
+        "indexed": true
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "DEFAULT_PAYLOAD_SIZE_LIMIT",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "DENOMINATOR",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_INVALID_COLLECTOR_ADDRESS",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_INVALID_REFERER",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_INVALID_TOKEN_ID",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_INVALID_URI_LOCK_STATE",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_MINT_EXCEEDS_LIMIT",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_MINT_INVALID_FEE",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_NOTHING_TO_CLAIM",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_NOT_FEE_COLLECTOR",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint8",
+        "name": "",
+        "internalType": "uint8"
+      }
+    ],
+    "name": "ERROR_REFERRAL_BIPS_TOO_HIGH",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "FIFTY_PERCENT",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      }
+    ],
+    "name": "FUNCTION_TYPE_SEND",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "ONE_HUNDRED_PERCENT",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "approve",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "balanceOf",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "bridgeFee",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "claimFeeEarnings",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "claimReferrerEarnings",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "clearCredits",
+    "inputs": [
+      {
+        "type": "bytes",
+        "name": "_payload",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "dstChainIdToBatchLimit",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "dstChainIdToTransferGas",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "nativeFee",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "zroFee",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "estimateSendBatchFee",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_toAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint256[]",
+        "name": "_tokenIds",
+        "internalType": "uint256[]"
+      },
+      {
+        "type": "bool",
+        "name": "_useZro",
+        "internalType": "bool"
+      },
+      {
+        "type": "bytes",
+        "name": "_adapterParams",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "nativeFee",
+        "internalType": "uint256"
+      },
+      {
+        "type": "uint256",
+        "name": "zroFee",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "estimateSendFee",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_toAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint256",
+        "name": "_tokenId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "bool",
+        "name": "_useZro",
+        "internalType": "bool"
+      },
+      {
+        "type": "bytes",
+        "name": "_adapterParams",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bytes32",
+        "name": "",
+        "internalType": "bytes32"
+      }
+    ],
+    "name": "failedMessages",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint64",
+        "name": "",
+        "internalType": "uint64"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "feeClaimedAmount",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "feeCollector",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "feeEarnedAmount",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "forceResumeReceive",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "getApproved",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bytes",
+        "name": "",
+        "internalType": "bytes"
+      }
+    ],
+    "name": "getConfig",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_version",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint16",
+        "name": "_chainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "_configType",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bytes",
+        "name": "",
+        "internalType": "bytes"
+      }
+    ],
+    "name": "getTrustedRemoteAddress",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_remoteChainId",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "isApprovedForAll",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "operator",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "isTrustedRemote",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "contract ILayerZeroEndpoint"
+      }
+    ],
+    "name": "lzEndpoint",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "lzReceive",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint64",
+        "name": "_nonce",
+        "internalType": "uint64"
+      },
+      {
+        "type": "bytes",
+        "name": "_payload",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "maxMintId",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "minDstGasLookup",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "minGasToTransferAndStore",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "payable",
+    "outputs": [],
+    "name": "mint",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "payable",
+    "outputs": [],
+    "name": "mint",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "referrer",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "mintFee",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "name",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "nonblockingLzReceive",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint64",
+        "name": "_nonce",
+        "internalType": "uint64"
+      },
+      {
+        "type": "bytes",
+        "name": "_payload",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "owner",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "ownerOf",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "payloadSizeLimitLookup",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ],
+    "name": "precrime",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "referralEarningBips",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "referredTransactionsCount",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "referrersClaimedAmount",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "referrersEarnedAmount",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "referrersEarningBips",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "renounceOwnership",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "payable",
+    "outputs": [],
+    "name": "retryMessage",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_srcChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_srcAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint64",
+        "name": "_nonce",
+        "internalType": "uint64"
+      },
+      {
+        "type": "bytes",
+        "name": "_payload",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "safeTransferFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "safeTransferFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "bytes",
+        "name": "data",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "payable",
+    "outputs": [],
+    "name": "sendBatchFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "_from",
+        "internalType": "address"
+      },
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_toAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint256[]",
+        "name": "_tokenIds",
+        "internalType": "uint256[]"
+      },
+      {
+        "type": "address",
+        "name": "_refundAddress",
+        "internalType": "address payable"
+      },
+      {
+        "type": "address",
+        "name": "_zroPaymentAddress",
+        "internalType": "address"
+      },
+      {
+        "type": "bytes",
+        "name": "_adapterParams",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "payable",
+    "outputs": [],
+    "name": "sendFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "_from",
+        "internalType": "address"
+      },
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_toAddress",
+        "internalType": "bytes"
+      },
+      {
+        "type": "uint256",
+        "name": "_tokenId",
+        "internalType": "uint256"
+      },
+      {
+        "type": "address",
+        "name": "_refundAddress",
+        "internalType": "address payable"
+      },
+      {
+        "type": "address",
+        "name": "_zroPaymentAddress",
+        "internalType": "address"
+      },
+      {
+        "type": "bytes",
+        "name": "_adapterParams",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setApprovalForAll",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "operator",
+        "internalType": "address"
+      },
+      {
+        "type": "bool",
+        "name": "approved",
+        "internalType": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setBridgeFee",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "_bridgeFee",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setConfig",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_version",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint16",
+        "name": "_chainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint256",
+        "name": "_configType",
+        "internalType": "uint256"
+      },
+      {
+        "type": "bytes",
+        "name": "_config",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setDstChainIdToBatchLimit",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint256",
+        "name": "_dstChainIdToBatchLimit",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setDstChainIdToTransferGas",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint256",
+        "name": "_dstChainIdToTransferGas",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setEarningBipsForReferrer",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "referrer",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "earningBips",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setEarningBipsForReferrersBatch",
+    "inputs": [
+      {
+        "type": "address[]",
+        "name": "referrers",
+        "internalType": "address[]"
+      },
+      {
+        "type": "uint256",
+        "name": "earningBips",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setFeeCollector",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "_feeCollector",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setMinDstGas",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint16",
+        "name": "_packetType",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint256",
+        "name": "_minGas",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setMinGasToTransferAndStore",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "_minGasToTransferAndStore",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setMintFee",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "_mintFee",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setPayloadSizeLimit",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_dstChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "uint256",
+        "name": "_size",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setPrecrime",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "_precrime",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setReceiveVersion",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_version",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setReferralEarningBips",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "_referralEarninBips",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setSendVersion",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_version",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setTokenBaseURI",
+    "inputs": [
+      {
+        "type": "string",
+        "name": "_newTokenBaseURI",
+        "internalType": "string"
+      },
+      {
+        "type": "string",
+        "name": "_fileExtension",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setTokenBaseURILocked",
+    "inputs": [
+      {
+        "type": "bool",
+        "name": "locked",
+        "internalType": "bool"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setTrustedRemote",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_remoteChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_path",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "setTrustedRemoteAddress",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "_remoteChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "bytes",
+        "name": "_remoteAddress",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "startMintId",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint16",
+        "name": "srcChainId",
+        "internalType": "uint16"
+      },
+      {
+        "type": "address",
+        "name": "toAddress",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "index",
+        "internalType": "uint256"
+      },
+      {
+        "type": "bool",
+        "name": "creditsRemain",
+        "internalType": "bool"
+      }
+    ],
+    "name": "storedCredits",
+    "inputs": [
+      {
+        "type": "bytes32",
+        "name": "",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "supportsInterface",
+    "inputs": [
+      {
+        "type": "bytes4",
+        "name": "interfaceId",
+        "internalType": "bytes4"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "symbol",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bool",
+        "name": "",
+        "internalType": "bool"
+      }
+    ],
+    "name": "tokenBaseURILocked",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "tokenByIndex",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "index",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "tokenCounter",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "tokenOfOwnerByIndex",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "owner",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "index",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "string",
+        "name": "",
+        "internalType": "string"
+      }
+    ],
+    "name": "tokenURI",
+    "inputs": [
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "uint256",
+        "name": "",
+        "internalType": "uint256"
+      }
+    ],
+    "name": "totalSupply",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "transferFrom",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "from",
+        "internalType": "address"
+      },
+      {
+        "type": "address",
+        "name": "to",
+        "internalType": "address"
+      },
+      {
+        "type": "uint256",
+        "name": "tokenId",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "nonpayable",
+    "outputs": [],
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "type": "address",
+        "name": "newOwner",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "stateMutability": "view",
+    "outputs": [
+      {
+        "type": "bytes",
+        "name": "",
+        "internalType": "bytes"
+      }
+    ],
+    "name": "trustedRemoteLookup",
+    "inputs": [
+      {
+        "type": "uint16",
+        "name": "",
+        "internalType": "uint16"
+      }
+    ]
+  }
+]
