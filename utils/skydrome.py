@@ -42,6 +42,9 @@ class Skydrome:
                 amount= eth_price * float(amount.Ether) * (1 - slippage / 100),
                 decimals= self.client.get_decimals(contract_token),
             )
+            chek = chek_gas_eth(self.maxGas)
+            if chek == False:
+                return 0            
             tx = self.client.send_transaction(
                 to= contract_skydrome,
                 value=amount.Wei,
