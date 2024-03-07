@@ -9,7 +9,7 @@ from config import TOKEN_USDC, useProxy
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s',
-                    filename='D:\\web3\\Scroll\\app.log',
+                    filename='.\\app.log',
                     filemode='a')
 logger = logging.getLogger()
 
